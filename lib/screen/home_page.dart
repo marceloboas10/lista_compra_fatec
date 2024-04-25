@@ -36,7 +36,7 @@ class HomePage extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(backgroundColor: Colors.yellow,
         onPressed: () {
           listaProvider.addListaPage(context, listaProvider);
         },

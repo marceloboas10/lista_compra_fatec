@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:lista_compra/model/lista.dart';
 
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ListaProvider extends ChangeNotifier {
   final List<Lista> _lista = [];
@@ -12,6 +15,35 @@ class ListaProvider extends ChangeNotifier {
 
   int get itemsListaCount {
     return _lista.length;
+  }
+
+  // Método para salvar a lista no SharedPreferences
+  Future<void> salvarLista() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String listaJson =
+        json.encode(_lista.map((e) => e.toJson()).toList());
+    await prefs.setString('lista_compra', listaJson);
+    print('lista salva');
+  }
+
+// Método para carregar a lista do SharedPreferences
+  Future<void> carregarLista() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? listaJson = prefs.getString('lista_compra');
+    if (listaJson != null) {
+      final List<dynamic> listaMap = json.decode(listaJson);
+      _lista.clear();
+      _lista.addAll(listaMap.map((e) => Lista.fromJson(e)).toList());
+      print('lista carregada');
+    }
+  }
+
+  void marcarItemConcluido(int index, String listaId, bool concluido) {
+    final listaIndex = _lista.indexWhere((lista) => lista.id == listaId);
+    if (listaIndex != -1 && index < _lista[listaIndex].itens.length) {
+      _lista[listaIndex].itens[index].estaFeito = concluido;
+      notifyListeners();
+    }
   }
 
   void addLista(Lista lista) {
@@ -41,13 +73,15 @@ class ListaProvider extends ChangeNotifier {
     }
   }
 
-  void editItem(int index, ItemsLista item) {
-    for (var lista in _lista) {
-      final itemIndex = lista.itens.indexOf(item);
-      if (itemIndex != -1) {
-        lista.itens[index] = item;
-      }
+  void editItem(int index, ItemsLista item, String listaId) {
+    final listaIndex = _lista.indexWhere((lista) => lista.id == listaId);
+    if (listaIndex != -1) {
+      _lista[listaIndex].itens[index] = item;
+      notifyListeners();
     }
+  }
+
+  void filtrarItens(String nomeItem) {
     notifyListeners();
   }
 
@@ -79,6 +113,7 @@ class ListaProvider extends ChangeNotifier {
                         itens: [],
                       ),
                     );
+                    salvarLista();
                     Navigator.pop(context);
                   }
                 },
@@ -161,7 +196,7 @@ class ListaProvider extends ChangeNotifier {
                   final ItemsLista addItem = ItemsLista(nome: nome, id: idItem);
                   Provider.of<ListaProvider>(context, listen: false)
                       .addItem(addItem);
-
+                  salvarLista();
                   Navigator.pop(context);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -180,7 +215,8 @@ class ListaProvider extends ChangeNotifier {
     );
   }
 
-  void editarItemLista(BuildContext context, ItemsLista item, int index) {
+  void editarItemLista(
+      BuildContext context, ItemsLista item, int index, String listaId) {
     final TextEditingController nomeListaController =
         TextEditingController(text: item.nome);
     showDialog(
@@ -203,9 +239,10 @@ class ListaProvider extends ChangeNotifier {
               onPressed: () {
                 final String nome = nomeListaController.text;
                 if (nome.isNotEmpty) {
-                  final ItemsLista editarNomeLista = ItemsLista(nome: nome);
+                  final ItemsLista editarNomeLista =
+                      ItemsLista(nome: nome, id: item.id);
                   Provider.of<ListaProvider>(context, listen: false)
-                      .editItem(index, editarNomeLista);
+                      .editItem(index, editarNomeLista, listaId);
                   Navigator.pop(context);
                 }
               },
@@ -215,6 +252,14 @@ class ListaProvider extends ChangeNotifier {
         );
       },
     );
+  }
+
+  void removeItem(int index, String listaId) {
+    final listaIndex = _lista.indexWhere((lista) => lista.id == listaId);
+    if (listaIndex != -1) {
+      _lista[listaIndex].itens.removeAt(index);
+      notifyListeners();
+    }
   }
 }
 

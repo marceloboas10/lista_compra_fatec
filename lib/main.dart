@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lista_compra/provider/lista_provider.dart';
-import 'package:lista_compra/screen/home_page.dart';
 import 'package:lista_compra/screen/login_page.dart';
 import 'package:provider/provider.dart';
 
@@ -29,7 +28,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const LoginPage(),
     );
   }
 }

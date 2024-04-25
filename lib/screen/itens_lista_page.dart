@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lista_compra/model/lista.dart';
 import 'package:lista_compra/provider/lista_provider.dart';
+import 'package:lista_compra/widgets/barra_pesquisa.dart';
 import 'package:lista_compra/widgets/itens_lista.dart';
 import 'package:provider/provider.dart';
 
 class ItensListaPage extends StatelessWidget {
-  const ItensListaPage(
+  ItensListaPage(
       {super.key, this.nome, required this.itens, required this.idItem});
+
   final String? nome;
   final String idItem;
   final List<ItemsLista> itens;
+  final TextEditingController nomeItem = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final ListaProvider itensListaProvider = context.watch<ListaProvider>();
+
+    List<ItemsLista> itensFiltrados = itens
+        .where((item) =>
+            item.nome.toLowerCase().startsWith(nomeItem.text.toLowerCase()))
+        .toList();
 
     return Scaffold(
         appBar: AppBar(
@@ -29,25 +36,27 @@ class ItensListaPage extends StatelessWidget {
         ),
         body: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Total Itens: ${itens.length}',
-                style: GoogleFonts.abel(fontSize: 26, color: Colors.black),
-              ),
+            BarraPesquisa(
+              buscaItem: nomeItem,
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: itens.length,
+                itemCount: itensFiltrados.length,
                 itemBuilder: (context, index) {
-                  final item = itens[index];
+                  final item = itensFiltrados[index];
                   return ItensLista(
                     nome: item.nome,
+                    concluido: item.estaFeito,
+                    onChanged: (value) {
+                      itensListaProvider.marcarItemConcluido(
+                          index, idItem, value!);
+                    },
                     deletar: () {
-                      //  itensListaProvider.removerItem(index);
+                      itensListaProvider.removeItem(index, idItem);
                     },
                     editar: () {
-                      itensListaProvider.editarItemLista(context, item, index);
+                      itensListaProvider.editarItemLista(
+                          context, item, index, idItem);
                     },
                   );
                 },

@@ -23,7 +23,9 @@ class ListaHome extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
       child: Row(
         children: [
-          InkWell(
+          SizedBox(
+            width: 271,
+            child: InkWell(
               onTap: () {
                 Navigator.push(
                   context,
@@ -37,9 +39,13 @@ class ListaHome extends StatelessWidget {
                 );
               },
               child: Text(
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 nome,
                 style: Theme.of(context).textTheme.titleLarge,
-              )),
+              ),
+            ),
+          ),
           const Spacer(),
           IconButton(
             onPressed: editar,
@@ -61,21 +67,6 @@ class ListaHome extends StatelessWidget {
       ),
     );
 
-    // ListTile(
-    //   title: InkWell(
-    //       onTap: () {
-    //         Navigator.push(
-    //             context,
-    //             MaterialPageRoute(
-    //               builder: (context) => ItensListaPage(),
-    //             ));
-    //       },
-    //       child: Text(nome)),
-    //   leading: Icon(Icons.abc),
-    //   trailing: IconButton(
-    //     onPressed: () {},
-    //     icon: Icon(Icons.edit),
-    //   ),
-    // );
+    
   }
 }
