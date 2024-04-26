@@ -23,7 +23,6 @@ class ListaProvider extends ChangeNotifier {
     final String listaJson =
         json.encode(_lista.map((e) => e.toJson()).toList());
     await prefs.setString('lista_compra', listaJson);
-    print('lista salva');
   }
 
 // Método para carregar a lista do SharedPreferences
@@ -34,7 +33,7 @@ class ListaProvider extends ChangeNotifier {
       final List<dynamic> listaMap = json.decode(listaJson);
       _lista.clear();
       _lista.addAll(listaMap.map((e) => Lista.fromJson(e)).toList());
-      print('lista carregada');
+
     }
   }
 
